@@ -1,0 +1,62 @@
+@startuml "AzureAD-DeleteUsers"
+'Included REPOS
+'!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Dynamic.puml
+'!includeurl https://raw.githubusercontent.com/plantuml-stdlib/Azure-PlantUML/release/2-1/dist/AzureCommon.puml
+
+' uncomment the following lines and comment the first to use locally
+'!include C4_Container.puml
+
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+'!include /Diagrams/C4_Container.uml
+!define AzurePuml https://raw.githubusercontent.com/czmirek/PlantUML-AzureIcons/main/dist
+!define AzurePuml2 https://raw.githubusercontent.com/plantuml-stdlib/Azure-PlantUML/master/dist
+!include AzurePuml/AzureCommon.puml
+!include AzurePuml2/AzureSimplified.puml
+!include AzurePuml/azure-cds/all.puml
+!include AzurePuml/azure-patterns/all.puml
+!define SPRITESURL https://raw.githubusercontent.com/plantuml-stdlib/gilbarbara-plantuml-sprites/v1.0/sprites
+' Examples below
+' CDSComputeFunctionApps(functionAlias, "Label", "Technology", "Optional Description", "Stereotype")
+' CDSComputeFunctionApps_m(functionAlias, "Label", "Technology", "Optional Description", "Stereotype")
+
+' Customizations
+AddRelTag("Publish", $textColor="Red", $lineColor="Red", $lineStyle = Line())
+AddRelTag("Trigger", $textColor="#ffff00", $lineColor="#ffff00", $lineStyle = Line())
+AddElementTag("stage", $shape=EightSidedShape())
+AddElementTag("rounded", $shape=RoundedBoxShape())
+
+
+LAYOUT_TOP_DOWN()
+'LAYOUT_LEFT_RIGHT()
+'LAYOUT_AS_SKETCH()
+'LAYOUT_WITH_LEGEND()
+
+CDSManageUserPrivacy(AdminUser, "Admin User","Azure AD and Subscription","Elevated priviledges" ,rounded)
+APAzureRepos(GitHub, "GitHub", "Stores", rounded)
+CDSDevopsAzureDevOps(CICD, "AzureDevOps", "Deploys", rounded)
+CDSSecurityKeyVaults(KV,"KeyVault","Secrets",rounded)
+CDSIntegrationLogicApps(Logic, "AADApp", "SecretsnCertsExpirationNotification",rounded)
+CDSWebAPIConnections(AKCCon, "AKV API", "Connection",rounded)
+CDSWebAPIConnections(O365, "Outlook API", "Connection",rounded)
+CDSIdentityAzureActiveDirectory(ActiveDirectory,"Target AzureAD","Applications", rounded)
+CDSManageCustomerLockboxforMicrosoftAzure(ServicePrincipal,"Service Principal","Application.Read.All, Directory.Read.All", rounded)
+CDSGeneralAllServices(AADAppSecretsnCertsExpiration, "AADAppSecretsnCertsExpiration","Notification over email", rounded)
+
+'Relations
+Rel_R(AdminUser,CICD,"Triggers","Deployment")
+Rel_D(GitHub,CICD,"VCS","Retrieves")
+Rel_D(KV,AKCCon,"APIConnection","Auth")
+Rel_D(ActiveDirectory,O365,"APIConnection","Auth")
+Rel_D(ActiveDirectory,ServicePrincipal,"ServicePrincipal","Auth")
+BiRel_D(ServicePrincipal,Logic,"ServicePrincipal","Reads AD Apps")
+BiRel(O365,Logic,"API Connection","Sends Email")
+BiRel(AKCCon,Logic,"API Connection","Reads AKV Secrets")
+Rel_R(CICD,Logic,"Bicep","Deployment")
+Rel_R(Logic,AADAppSecretsnCertsExpiration,"Notification","Generates and Send")
+
+
+
+
+
+@enduml
